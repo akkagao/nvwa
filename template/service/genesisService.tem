@@ -1,0 +1,89 @@
+package {{.Package}}
+
+import (
+	"time"
+
+	"github.com/jinzhu/gorm"
+)
+
+type {{.ServiceName}} struct {
+	Id         int       `json:"id";gorm:"primary_key"`
+	CreateTime time.Time `json:"createTime";`
+	DeletedAt  time.Time `json:"deletedAt"` // 如果模型有DeletedAt字段，它将自动获得软删除功能！ 那么在调用Delete时不会从数据库中永久删除，而是只将字段DeletedAt的值设置为当前时间。
+}
+
+/**
+* ID 小于 1 说明插入错误
+ */
+func (o *{{.ServiceName}}) IsNil() bool {
+	return o.Id < 1
+}
+
+/**
+* 是否已经删除 DeletedAt 字段为默认零值
+ */
+func (o *{{.ServiceName}}) IsDel() bool {
+	return !o.DeletedAt.IsZero()
+}
+
+type {{.ServiceNameLow}}Service struct {
+	db *gorm.DB
+}
+
+func New{{.ServiceName}}Service(db *gorm.DB) *{{.ServiceNameLow}}Service {
+	return &{{.ServiceNameLow}}Service{
+		db: db,
+	}
+}
+
+/**
+* 保存
+ */
+func (s *{{.ServiceNameLow}}Service) Save({{.ServiceNameLow}} *{{.ServiceName}}) bool {
+	s.db.Save({{.ServiceNameLow}})
+	return {{.ServiceNameLow}}.Id > 0
+}
+
+/**
+* 根据ID查询
+ */
+func (s *{{.ServiceNameLow}}Service) GetById(id int) {{.ServiceName}} {
+	{{.ServiceNameLow}} := {{.ServiceName}}{}
+	s.db.Raw("select * from {{.ServiceNameLow}} t where t.id = ?", id).Scan(&{{.ServiceNameLow}})
+	return {{.ServiceNameLow}}
+}
+
+/**
+* 根据ID列表查询
+ */
+func (s *{{.ServiceNameLow}}Service) GetByIds(ids []int) []{{.ServiceName}} {
+	{{.ServiceNameLow}}List := make([]{{.ServiceName}}, 0)
+	if len(ids) < 1 {
+		return {{.ServiceNameLow}}List
+	}
+	s.db.Raw("select * from {{.ServiceNameLow}} t where t.id in (?) ", ids).Scan(&{{.ServiceNameLow}}List)
+	return {{.ServiceNameLow}}List
+}
+
+/**
+* 统计总数DeletedAt不为null
+ */
+func (s *{{.ServiceNameLow}}Service) Count() int {
+	countVo := 0
+	s.db.Model(&{{.ServiceName}}{}).Count(&countVo)
+	return countVo
+}
+
+/**
+* 软删除DeletedAt设置为当前时间
+ */
+func (s *{{.ServiceNameLow}}Service) DeleteById(id int) {
+	s.db.Delete(&{{.ServiceName}}{Id: id})
+}
+
+/**
+* 修改{{.ServiceNameLow}}对象中的fields字段
+ */
+func (s *{{.ServiceNameLow}}Service) Update({{.ServiceNameLow}} {{.ServiceName}}, fields ...string) {
+	s.db.Model(&{{.ServiceNameLow}}).Select(fields).Update(&{{.ServiceNameLow}})
+}
