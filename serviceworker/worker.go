@@ -26,6 +26,7 @@ func Start(name string) {
 		ServiceNameLow: name,
 	}
 	fileName := name + "Service.go"
+	os.Remove(fileName)
 	fileObj, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, 0644)
 	err = t.Execute(fileObj, nameVo)
 	goutil.ChkErr(err)
