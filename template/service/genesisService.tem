@@ -7,8 +7,8 @@ import (
 )
 
 type {{.ServiceName}} struct {
-	Id         int       `json:"id";gorm:"primary_key"`
-	CreateTime time.Time `json:"createTime";`
+	Id         int       `json:"id";gorm:"primary_key"`// ID
+	CreateTime time.Time `json:"createTime";` // 创建时间
 	Isdel      int       `json:"isdel";default:0` // 是否删除 1:删除，其他状态都为正常
 }
 
