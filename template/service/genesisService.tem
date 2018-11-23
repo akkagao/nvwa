@@ -9,7 +9,7 @@ import (
 type {{.ServiceName}} struct {
 	Id         int       `json:"id";gorm:"primary_key"`
 	CreateTime time.Time `json:"createTime";`
-	DeletedAt  time.Time `json:"deletedAt"` // 如果模型有DeletedAt字段，它将自动获得软删除功能！ 那么在调用Delete时不会从数据库中永久删除，而是只将字段DeletedAt的值设置为当前时间。
+	Isdel      int       `json:"isdel";default:0` // 是否删除 1:删除，其他状态都为正常
 }
 
 /**
@@ -23,7 +23,7 @@ func (o *{{.ServiceName}}) IsNil() bool {
 * 是否已经删除 DeletedAt 字段为默认零值
  */
 func (o *{{.ServiceName}}) IsDel() bool {
-	return !o.DeletedAt.IsZero()
+	return o.Isdel == 1
 }
 
 type {{.ServiceNameLow}}Service struct {
@@ -40,6 +40,7 @@ func New{{.ServiceName}}Service(db *gorm.DB) *{{.ServiceNameLow}}Service {
 * 保存
  */
 func (s *{{.ServiceNameLow}}Service) Save({{.ServiceNameLow}} *{{.ServiceName}}) bool {
+	{{.ServiceNameLow}}.CreateTime = time.Now()
 	s.db.Save({{.ServiceNameLow}})
 	return {{.ServiceNameLow}}.Id > 0
 }
